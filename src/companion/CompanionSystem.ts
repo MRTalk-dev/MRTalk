@@ -1,9 +1,12 @@
 import type { Entity } from "@iwsdk/core";
 import { createSystem } from "@iwsdk/core";
 import type { VRM } from "@pixiv/three-vrm";
-import * as THREE from "three";
+import type * as THREE from "three";
 import type { NavMeshManager } from "../navmesh/NavMeshManager";
+import { CompanionAnimationController } from "./CompanionAnimationController";
 import { CompanionComponent, CompanionState } from "./CompanionComponent";
+import { CompanionMovementController } from "./CompanionMovementController";
+import { CompanionStateManager } from "./CompanionStateManager";
 
 interface CompanionData {
 	vrm: VRM;
@@ -12,11 +15,19 @@ interface CompanionData {
 	currentAction: THREE.AnimationAction | null;
 }
 
+/**
+ * ECS System for managing AI companions
+ * Orchestrates animation, movement, and state controllers
+ */
 export class CompanionSystem extends createSystem({
 	companions: { required: [CompanionComponent] },
 }) {
 	private navMeshManager: NavMeshManager | null = null;
 	private companionDataMap = new Map<number, CompanionData>();
+
+	private animationController = new CompanionAnimationController();
+	private movementController = new CompanionMovementController();
+	private stateManager = new CompanionStateManager();
 
 	setNavMeshManager(manager: NavMeshManager) {
 		this.navMeshManager = manager;
@@ -31,70 +42,70 @@ export class CompanionSystem extends createSystem({
 	}
 
 	update(delta: number) {
+		// Update NavMesh crowd simulation
 		if (this.navMeshManager) {
 			this.navMeshManager.update(delta);
 		}
 
-		//各コンパニオンの描画を更新する
+		// Update each companion
 		for (const entity of this.queries.companions.entities) {
-			const data = this.companionDataMap.get(entity.index);
-			if (!data) continue;
-
-			//現在の状態をComponentから取得
-			const state = entity.getValue(CompanionComponent, "state");
-			const hasTarget = entity.getValue(CompanionComponent, "hasTarget");
-			const agentIndex = entity.getValue(CompanionComponent, "agentIndex");
-			if (!data.vrm || !data.mixer) continue;
-
-			data.vrm.update(delta);
-			data.mixer.update(delta);
-
-			//歩き/走り時のアニメーション処理
-			if (
-				(state === CompanionState.Walk || state === CompanionState.Run) &&
-				agentIndex !== null &&
-				agentIndex >= 0
-			) {
-				if (!this.navMeshManager) continue;
-
-				//NavMesh Agentの速度と位置をとる(毎フレーム)
-				const agentPos = this.navMeshManager.getAgentPosition(agentIndex);
-				const agentVel = this.navMeshManager.getAgentVelocity(agentIndex);
-
-				if (agentPos) {
-					data.vrm.scene.position.copy(agentPos);
-					if (hasTarget && agentVel) {
-						const speed = agentVel.length();
-						//スピードが遅ければ止まる
-						if (speed < 0.1) {
-							this.transitionToIdle(entity);
-						} else {
-							//進行方向を向く
-							const lookDirection = agentVel.clone().normalize();
-							if (lookDirection.lengthSq() > 0) {
-								const targetPoint = new THREE.Vector3().addVectors(
-									data.vrm.scene.position,
-									lookDirection,
-								);
-
-								const currentRotation = data.vrm.scene.quaternion.clone();
-								data.vrm.scene.lookAt(targetPoint);
-								const targetRotation = data.vrm.scene.quaternion.clone();
-
-								data.vrm.scene.quaternion.copy(currentRotation);
-								data.vrm.scene.quaternion.slerp(targetRotation, 0.1);
-							}
-						}
-					}
-				}
-			}
+			this.updateCompanion(entity, delta);
 		}
 	}
 
-	//idleに戻る
+	private updateCompanion(entity: Entity, delta: number) {
+		const data = this.companionDataMap.get(entity.index);
+		if (!data || !data.vrm || !data.mixer) return;
+
+		// Update VRM and animations
+		data.vrm.update(delta);
+		data.mixer.update(delta);
+
+		// Get current state
+		const state = this.stateManager.getCurrentState(entity);
+		const hasTarget = this.stateManager.hasTarget(entity);
+		const agentIndex = this.stateManager.getAgentIndex(entity);
+
+		// Handle movement states (Walk/Run)
+		if (
+			(state === CompanionState.Walk || state === CompanionState.Run) &&
+			agentIndex !== null &&
+			this.navMeshManager
+		) {
+			this.updateMovement(entity, data, hasTarget, agentIndex);
+		}
+	}
+
+	private updateMovement(
+		entity: Entity,
+		data: CompanionData,
+		hasTarget: boolean,
+		agentIndex: number,
+	) {
+		if (!this.navMeshManager) return;
+
+		const agentPos = this.navMeshManager.getAgentPosition(agentIndex);
+		const agentVel = this.navMeshManager.getAgentVelocity(agentIndex);
+
+		if (!agentPos || !agentVel) return;
+
+		// Update position
+		this.movementController.updatePosition(data.vrm.scene, agentPos);
+
+		if (!hasTarget) return;
+
+		// Check arrival
+		if (this.movementController.checkArrival(agentVel)) {
+			this.transitionToIdle(entity);
+			return;
+		}
+
+		// Update rotation to face movement direction
+		this.movementController.updateRotation(data.vrm.scene, agentVel);
+	}
+
 	private transitionToIdle(entity: Entity) {
-		entity.setValue(CompanionComponent, "state", CompanionState.Idle);
-		entity.setValue(CompanionComponent, "hasTarget", false);
+		this.stateManager.transitionToIdle(entity);
 		this.playAnimation(entity, "idle", true);
 	}
 
@@ -105,77 +116,57 @@ export class CompanionSystem extends createSystem({
 		onFinished?: () => void,
 	) {
 		const data = this.companionDataMap.get(entity.index);
-		if (!data || !data.mixer || !data.animations[animationName]) {
-			console.warn(`Animation ${animationName} not found`);
+		if (!data || !data.mixer) {
+			console.warn("Companion data or mixer not found");
 			return;
 		}
 
-		const newClip = data.animations[animationName];
-		const newAction = data.mixer.clipAction(newClip);
-
-		if (data.currentAction && data.currentAction !== newAction) {
-			data.currentAction.fadeOut(0.3);
-		}
-
-		//アニメーションをクロスフェード
-		newAction.reset();
-		newAction.fadeIn(0.3);
-		newAction.setLoop(
-			loop ? THREE.LoopRepeat : THREE.LoopOnce,
-			loop ? Infinity : 1,
+		const newAction = this.animationController.playAnimation(
+			data.mixer,
+			data.animations,
+			data.currentAction,
+			animationName,
+			loop,
+			onFinished,
 		);
-		newAction.clampWhenFinished = true;
-		newAction.play();
 
-		//loopではない場合コールバックを実行
-		if (!loop && onFinished) {
-			const onFinishedHandler = (e: { action: THREE.AnimationAction }) => {
-				if (e.action === newAction) {
-					data.mixer?.removeEventListener("finished", onFinishedHandler);
-					onFinished();
-				}
-			};
-			data.mixer.addEventListener("finished", onFinishedHandler);
+		if (newAction) {
+			data.currentAction = newAction;
 		}
-
-		data.currentAction = newAction;
 	}
 
-	//歩く
 	walkTo(entity: Entity, target: THREE.Vector3) {
-		const agentIndex = entity.getValue(CompanionComponent, "agentIndex");
-		if (!this.navMeshManager || agentIndex === null || agentIndex < 0) {
+		const agentIndex = this.stateManager.getAgentIndex(entity);
+		if (!this.navMeshManager || agentIndex === null) {
 			console.warn("NavMeshManager not ready or agent not created");
 			return;
 		}
 
+		// Set walk speed and target
 		this.navMeshManager.setAgentSpeed(agentIndex, 1.0);
 		this.navMeshManager.setAgentTarget(agentIndex, target);
 
-		entity.setValue(CompanionComponent, "state", CompanionState.Walk);
-		entity.setValue(CompanionComponent, "hasTarget", true);
-
+		// Transition state
+		this.stateManager.transitionToWalk(entity);
 		this.playAnimation(entity, "walk", true);
 	}
 
-	//走る
 	runTo(entity: Entity, target: THREE.Vector3) {
-		const agentIndex = entity.getValue(CompanionComponent, "agentIndex");
-		if (!this.navMeshManager || agentIndex === null || agentIndex < 0) {
+		const agentIndex = this.stateManager.getAgentIndex(entity);
+		if (!this.navMeshManager || agentIndex === null) {
 			console.warn("NavMeshManager not ready or agent not created");
 			return;
 		}
 
+		// Set run speed (2.5x faster than walk)
 		this.navMeshManager.setAgentSpeed(agentIndex, 2.5);
 		this.navMeshManager.setAgentTarget(agentIndex, target);
 
-		entity.setValue(CompanionComponent, "state", CompanionState.Run);
-		entity.setValue(CompanionComponent, "hasTarget", true);
-
+		// Transition state
+		this.stateManager.transitionToRun(entity);
 		this.playAnimation(entity, "run", true);
 	}
 
-	//その場でのジェスチャー
 	playGesture(entity: Entity, gestureName: string) {
 		const data = this.companionDataMap.get(entity.index);
 		if (!data || !data.animations[gestureName]) {
@@ -183,10 +174,10 @@ export class CompanionSystem extends createSystem({
 			return;
 		}
 
-		entity.setValue(CompanionComponent, "state", CompanionState.Gesture);
-		entity.setValue(CompanionComponent, "currentGesture", gestureName);
+		// Transition to gesture state
+		this.stateManager.transitionToGesture(entity, gestureName);
 
-		//1周したらidleに戻る
+		// Play gesture animation (non-looping, return to idle when finished)
 		this.playAnimation(entity, gestureName, false, () => {
 			this.transitionToIdle(entity);
 		});
