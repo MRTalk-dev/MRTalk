@@ -1,5 +1,6 @@
 import {
 	DirectionalLight,
+	type Entity,
 	SceneUnderstandingSystem,
 	SessionMode,
 	World,
@@ -104,7 +105,6 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 			const waitForNavMesh = () => {
 				if (navMeshManager.isReady()) {
 					console.log("NavMesh is ready, creating agent");
-
 					const agentIndex = navMeshManager.addAgent(vrm.scene.position);
 					if (agentIndex !== null) {
 						companionEntity.setValue(
@@ -114,6 +114,22 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 						);
 						console.log("Companion agent created:", agentIndex);
 						companionSystem.playAnimation(companionEntity, "idle", true);
+
+						const firehoseUrl = "ws://localhost:8080";
+						const ws = new WebSocket(firehoseUrl);
+
+						ws.onmessage = (event) => {
+							try {
+								const json = JSON.parse(event.toString());
+								switch (json.method) {
+									case "action.send": {
+										handleAction(companionEntity, companionSystem, json);
+									}
+								}
+							} catch (e) {
+								console.log(e);
+							}
+						};
 					} else {
 						console.error("Failed to create agent");
 					}
@@ -129,3 +145,41 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 		}
 	}
 });
+
+function handleAction(
+	entity: Entity,
+	companion: CompanionSystem,
+	params: { name: string; params: Record<string, unknown>; from: string },
+) {
+	switch (params.name) {
+		case "walk":
+			if (
+				typeof params.params.x === "number" &&
+				typeof params.params.y === "number" &&
+				typeof params.params.z === "number"
+			) {
+				companion.walkTo(
+					entity,
+					new THREE.Vector3(params.params.x, params.params.y, params.params.z),
+				);
+			}
+			break;
+		case "run":
+			if (
+				typeof params.params.x === "number" &&
+				typeof params.params.y === "number" &&
+				typeof params.params.z === "number"
+			) {
+				companion.runTo(
+					entity,
+					new THREE.Vector3(params.params.x, params.params.y, params.params.z),
+				);
+			}
+			break;
+		case "gesture":
+			if (typeof params.params.name === "string") {
+				companion.playGesture(entity, params.params.name);
+			}
+			break;
+	}
+}
