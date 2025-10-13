@@ -7,6 +7,10 @@ export class MeshProcessSystem extends createSystem({
 }) {
 	private navMeshManager!: NavMeshManager;
 	private globalMeshes: THREE.Mesh[] = [];
+	private furnitureEntities: Array<{
+		label: string;
+		position: THREE.Vector3;
+	}> = [];
 
 	init() {
 		this.navMeshManager = new NavMeshManager();
@@ -15,9 +19,13 @@ export class MeshProcessSystem extends createSystem({
 			const isBounded = entity.getValue(XRMesh, "isBounded3D");
 			const semanticLabel = entity.getValue(XRMesh, "semanticLabel");
 
-			if (isBounded && semanticLabel) {
+			if (isBounded && semanticLabel && entity.object3D) {
 				console.log("家具", entity);
-			} else {
+				this.furnitureEntities.push({
+					label: semanticLabel,
+					position: entity.object3D.position,
+				});
+			} else if (!isBounded || !semanticLabel) {
 				console.log("Global Mesh", entity);
 				const mesh = entity.object3D as THREE.Mesh;
 				if (mesh instanceof THREE.Mesh) {
@@ -39,5 +47,19 @@ export class MeshProcessSystem extends createSystem({
 
 	getNavMeshManager(): NavMeshManager {
 		return this.navMeshManager;
+	}
+
+	getFurniture(): Array<{
+		label: string;
+		position: { x: number; y: number; z: number };
+	}> {
+		return this.furnitureEntities.map((furniture) => ({
+			label: furniture.label,
+			position: {
+				x: furniture.position.x,
+				y: furniture.position.y,
+				z: furniture.position.z,
+			},
+		}));
 	}
 }

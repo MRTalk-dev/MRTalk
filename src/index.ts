@@ -120,10 +120,16 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 
 						ws.onmessage = (event) => {
 							try {
-								const json = JSON.parse(event.toString());
+								const json = JSON.parse(event.data.toString());
+								console.log(json);
 								switch (json.method) {
 									case "action.send": {
-										handleAction(companionEntity, companionSystem, json);
+										handleAction(companionEntity, companionSystem, json.params);
+										break;
+									}
+									case "query.send": {
+										handleQuery(json, ws, world, meshProcessSystem);
+										break;
 									}
 								}
 							} catch (e) {
@@ -182,4 +188,50 @@ function handleAction(
 			}
 			break;
 	}
+}
+
+function handleQuery(
+	query: { id: string; params: { type: string; from: string } },
+	ws: WebSocket,
+	world: World,
+	meshProcessSystem: MeshProcessSystem | undefined,
+) {
+	let result: { success: boolean; body: Record<string, unknown> };
+
+	switch (query.params.type) {
+		case "objects": {
+			const objects = meshProcessSystem ? meshProcessSystem.getFurniture() : [];
+
+			result = {
+				success: true,
+				body: { list: objects },
+			};
+			break;
+		}
+		case "user": {
+			const position = world.camera.position;
+			result = {
+				success: true,
+				body: { x: position.x, y: position.y, z: position.z },
+			};
+			break;
+		}
+		default:
+			result = {
+				success: false,
+				body: { error: "Unknown query type" },
+			};
+	}
+
+	const response = {
+		topic: "queries",
+		body: {
+			jsonrpc: "2.0",
+			id: query.id,
+			result,
+		},
+	};
+
+	console.log(response);
+	ws.send(JSON.stringify(response));
 }

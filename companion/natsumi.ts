@@ -64,7 +64,7 @@ export const companionCard: CompanionCard = {
 				],
 			},
 			{
-				expression: "need_move == true && need_run == need_run",
+				expression: "need_move == true && need_run == true",
 				execute: [
 					{
 						instruction: "駆け寄る",
