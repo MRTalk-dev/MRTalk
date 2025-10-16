@@ -5,11 +5,12 @@ import {
 	CompanionServer,
 	type Message,
 } from "@aikyo/server";
-import { companionNetworkKnowledge, speakTool } from "@aikyo/utils";
+import { companionNetworkKnowledge } from "@aikyo/utils";
 import {
 	gestureAction,
 	objectKnowledge,
 	runAction,
+	speakTool,
 	userKnowledge,
 	walkAction,
 } from "./tools";

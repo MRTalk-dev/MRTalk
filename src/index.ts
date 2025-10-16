@@ -10,11 +10,14 @@ import {
 } from "@iwsdk/core";
 import { init } from "recast-navigation";
 import * as THREE from "three";
+import Client from "voicevox-client";
 import { loadMixamoAnimation } from "../lib/mixamo/loadMixamoAnimation";
 import { loadVRM } from "../lib/VRM/loadVRM";
 import { CompanionComponent } from "./companion/CompanionComponent";
 import { CompanionSystem } from "./companion/CompanionSystem";
 import { MeshProcessSystem } from "./mesh";
+
+const client = new Client("http://127.0.0.1:50021");
 
 World.create(document.getElementById("scene-container") as HTMLDivElement, {
 	xr: {
@@ -190,15 +193,51 @@ function handleAction(
 	}
 }
 
-function handleQuery(
-	query: { id: string; params: { type: string; from: string } },
+async function handleQuery(
+	query: {
+		id: string;
+		params: { type: string; from: string; body: Record<string, unknown> };
+	},
 	ws: WebSocket,
 	world: World,
 	meshProcessSystem: MeshProcessSystem | undefined,
 ) {
-	let result: { success: boolean; body: Record<string, unknown> };
+	let result:
+		| { success: boolean; body: Record<string, unknown> }
+		| { success: boolean; error: string };
 
 	switch (query.params.type) {
+		case "speak": {
+			if (typeof query.params.body.message === "string") {
+				const audioquery = await client.createAudioQuery(
+					query.params.body.message,
+					2,
+				);
+				const source = await audioquery.synthesis(1);
+				const blob = new Blob([source], { type: "audio/wav" });
+				const url = URL.createObjectURL(blob);
+				const audio = new Audio(url);
+
+				await new Promise<void>((resolve) => {
+					audio.addEventListener("ended", () => {
+						resolve();
+					});
+					audio.play();
+				});
+
+				result = {
+					success: true,
+					body: { success: true },
+				};
+			} else {
+				result = {
+					success: false,
+					error: "messageが不正です。",
+				};
+			}
+
+			break;
+		}
 		case "objects": {
 			const objects = meshProcessSystem ? meshProcessSystem.getFurniture() : [];
 

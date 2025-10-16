@@ -38,6 +38,9 @@ importers:
       three:
         specifier: npm:super-three@0.177.0
         version: super-three@0.177.0
+      voicevox-client:
+        specifier: ^0.3.1
+        version: 0.3.1
       zod:
         specifier: 3.25.76
         version: 3.25.76
@@ -5505,6 +5508,9 @@ packages:
 
   vlq@1.0.1:
     resolution: {integrity: sha512-gQpnTgkubC6hQgdIcRdYGDSDc+SaujOdyesZQMv6JlfQee/9Mp0Qhnys6WxDWvQnL5WZdT7o2Ul187aSt0Rq+w==}
+
+  voicevox-client@0.3.1:
+    resolution: {integrity: sha512-5KFZczRHWMEHzqIrE8VjYJ8OkFerUyIVwRPL2XlW+iuWaX6LREBSAKLZpaX3MaH2warhFo5NQ2b779e9dTsOeA==}
 
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
@@ -12967,6 +12973,8 @@ snapshots:
       yaml: 2.8.1
 
   vlq@1.0.1: {}
+
+  voicevox-client@0.3.1: {}
 
   walker@1.0.8:
     dependencies:
