@@ -8,6 +8,7 @@ import {
 	XRMesh,
 	XRPlane,
 } from "@iwsdk/core";
+import type { VRM } from "@pixiv/three-vrm";
 import { init } from "recast-navigation";
 import * as THREE from "three";
 import Client from "voicevox-client";
@@ -131,7 +132,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 										break;
 									}
 									case "query.send": {
-										handleQuery(json, ws, world, meshProcessSystem);
+										handleQuery(json, ws, world, meshProcessSystem, vrm);
 										break;
 									}
 								}
@@ -201,6 +202,7 @@ async function handleQuery(
 	ws: WebSocket,
 	world: World,
 	meshProcessSystem: MeshProcessSystem | undefined,
+	vrm: VRM,
 ) {
 	let result:
 		| { success: boolean; body: Record<string, unknown> }
@@ -211,12 +213,17 @@ async function handleQuery(
 			if (typeof query.params.body.message === "string") {
 				const audioquery = await client.createAudioQuery(
 					query.params.body.message,
-					2,
+					8,
 				);
 				const source = await audioquery.synthesis(1);
 				const blob = new Blob([source], { type: "audio/wav" });
 				const url = URL.createObjectURL(blob);
 				const audio = new Audio(url);
+
+				const emotion = query.params.body.emotion;
+				if (vrm.expressionManager && typeof emotion === "string") {
+					vrm.expressionManager.setValue(emotion, 1.0);
+				}
 
 				await new Promise<void>((resolve) => {
 					audio.addEventListener("ended", () => {
