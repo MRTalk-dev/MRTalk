@@ -55,7 +55,7 @@ export const companionCard: CompanionCard = {
 		},
 		conditions: [
 			{
-				expression: "want_gesture",
+				expression: "want_gesture == true",
 				execute: [
 					{
 						instruction: "ジェスチャーで体の動きを表現する",
@@ -67,7 +67,7 @@ export const companionCard: CompanionCard = {
 				expression: "need_move == true && need_run == true",
 				execute: [
 					{
-						instruction: "駆け寄る",
+						instruction: "最新の移動先情報を確認して、駆け寄る",
 						tool: runAction,
 					},
 				],
@@ -76,7 +76,7 @@ export const companionCard: CompanionCard = {
 				expression: "need_move == true",
 				execute: [
 					{
-						instruction: "移動する",
+						instruction: "最新の移動先情報を確認して、移動する",
 						tool: runAction,
 					},
 				],
