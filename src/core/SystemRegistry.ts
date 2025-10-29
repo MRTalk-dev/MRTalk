@@ -58,7 +58,7 @@ export class SystemRegistry {
 	}
 
 	/**
-	 * シーン理解システムを設定
+	 * SceneUnderstandingを設定
 	 */
 	private configureSceneUnderstanding(
 		system: SceneUnderstandingSystem | undefined,

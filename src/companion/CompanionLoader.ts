@@ -3,7 +3,7 @@ import type { VRM } from "@pixiv/three-vrm";
 import * as THREE from "three";
 import { loadMixamoAnimation } from "../../lib/mixamo/loadMixamoAnimation";
 import { loadVRM } from "../../lib/VRM/loadVRM";
-import { CONFIG } from "../config/constants";
+import { type CompanionConfig, CONFIG } from "../config/constants";
 import type { NavMeshManager } from "../navmesh/NavMeshManager";
 import { CompanionComponent } from "./CompanionComponent";
 import type { CompanionSystem } from "./CompanionSystem";
@@ -12,6 +12,7 @@ import type { CompanionSystem } from "./CompanionSystem";
  * 読み込まれたコンパニオンのデータ
  */
 export interface CompanionData {
+	id: string;
 	entity: Entity;
 	vrm: VRM;
 	mixer: THREE.AnimationMixer;
@@ -26,21 +27,27 @@ export class CompanionLoader {
 	 * @param world Worldインスタンス
 	 * @param companionSystem コンパニオンシステムインスタンス
 	 * @param navMeshManager NavMeshマネージャーインスタンス
+	 * @param config コンパニオンの設定
+	 * @param positionOffset コンパニオンの位置オフセット(複数コンパニオン配置用)
 	 * @returns 読み込まれたコンパニオンデータ
 	 */
 	async loadAndSetup(
 		world: World,
 		companionSystem: CompanionSystem,
 		navMeshManager: NavMeshManager,
+		config: CompanionConfig,
+		positionOffset = 0,
 	): Promise<CompanionData> {
-		console.log("[CompanionLoader] Starting companion setup...");
+		console.log(
+			`[CompanionLoader] Starting companion setup for ${config.id}...`,
+		);
 
 		// VRMモデルを読み込み
-		const { gltf } = await loadVRM(CONFIG.VRM_PATH);
+		const { gltf } = await loadVRM(config.vrmPath);
 		const vrm = gltf.userData.vrm;
 
-		// 位置を設定してシーンに追加
-		vrm.scene.position.set(0, 0, -1);
+		// 位置を設定してシーンに追加(複数コンパニオンの場合はX軸でずらす)
+		vrm.scene.position.set(positionOffset, 0, -1);
 		world.scene.add(vrm.scene);
 
 		// アニメーションを読み込み
@@ -67,9 +74,9 @@ export class CompanionLoader {
 			companionSystem,
 		);
 
-		console.log("[CompanionLoader] Companion setup complete");
+		console.log(`[CompanionLoader] Companion setup complete for ${config.id}`);
 
-		return { entity, vrm, mixer };
+		return { id: config.id, entity, vrm, mixer };
 	}
 
 	/**

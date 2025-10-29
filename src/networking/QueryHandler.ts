@@ -29,7 +29,7 @@ export class QueryHandler {
 	constructor(
 		private world: World,
 		private meshProcessSystem: MeshProcessSystem | undefined,
-		private voiceVoxClient: VoiceVoxClient,
+		private voiceClientMap: Map<string, VoiceVoxClient>,
 		private ws: WebSocketClient,
 	) {}
 
@@ -38,14 +38,16 @@ export class QueryHandler {
 	 * @param query クエリメッセージ
 	 */
 	async handleQuery(query: QueryMessage): Promise<void> {
-		console.log(`[QueryHandler] Handling query type: ${query.params.type}`);
+		console.log(
+			`[QueryHandler] Handling query type: ${query.params.type} from ${query.params.from}`,
+		);
 
 		let result: QueryResult;
 
 		try {
 			switch (query.params.type) {
 				case "speak":
-					result = await this.handleSpeak(query.params.body);
+					result = await this.handleSpeak(query.params.body, query.params.from);
 					break;
 				case "objects":
 					result = this.handleObjects();
@@ -75,6 +77,7 @@ export class QueryHandler {
 	 */
 	private async handleSpeak(
 		body: Record<string, unknown>,
+		from: string,
 	): Promise<QueryResult> {
 		if (typeof body.message !== "string") {
 			return {
@@ -83,8 +86,17 @@ export class QueryHandler {
 			};
 		}
 
+		// fromフィールドから該当するVoiceVoxClientを取得
+		const voiceClient = this.voiceClientMap.get(from);
+		if (!voiceClient) {
+			return {
+				success: false,
+				error: `VoiceVoxClient not found for companion: ${from}`,
+			};
+		}
+
 		const emotion = typeof body.emotion === "string" ? body.emotion : undefined;
-		await this.voiceVoxClient.speak(body.message, emotion);
+		await voiceClient.speak(body.message, emotion);
 
 		return {
 			success: true,

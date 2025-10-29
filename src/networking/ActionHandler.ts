@@ -1,5 +1,5 @@
-import type { Entity } from "@iwsdk/core";
 import * as THREE from "three";
+import type { CompanionData } from "../companion/CompanionLoader";
 import type { CompanionSystem } from "../companion/CompanionSystem";
 
 /**
@@ -16,7 +16,7 @@ export interface ActionParams {
  */
 export class ActionHandler {
 	constructor(
-		private companionEntity: Entity,
+		private companionMap: Map<string, CompanionData>,
 		private companionSystem: CompanionSystem,
 	) {}
 
@@ -25,17 +25,28 @@ export class ActionHandler {
 	 * @param params アクションパラメータ
 	 */
 	handleAction(params: ActionParams): void {
-		console.log(`[ActionHandler] Handling action: ${params.name}`);
+		console.log(
+			`[ActionHandler] Handling action: ${params.name} from ${params.from}`,
+		);
+
+		// fromフィールドからコンパニオンを特定
+		const companion = this.companionMap.get(params.from);
+		if (!companion) {
+			console.warn(
+				`[ActionHandler] Companion not found for ID: ${params.from}`,
+			);
+			return;
+		}
 
 		switch (params.name) {
 			case "walk":
-				this.handleWalk(params.params);
+				this.handleWalk(companion, params.params);
 				break;
 			case "run":
-				this.handleRun(params.params);
+				this.handleRun(companion, params.params);
 				break;
 			case "gesture":
-				this.handleGesture(params.params);
+				this.handleGesture(companion, params.params);
 				break;
 			default:
 				console.warn(`[ActionHandler] Unknown action: ${params.name}`);
@@ -45,14 +56,17 @@ export class ActionHandler {
 	/**
 	 * 歩行アクションを処理
 	 */
-	private handleWalk(params: Record<string, unknown>): void {
+	private handleWalk(
+		companion: CompanionData,
+		params: Record<string, unknown>,
+	): void {
 		if (
 			typeof params.x === "number" &&
 			typeof params.y === "number" &&
 			typeof params.z === "number"
 		) {
 			const target = new THREE.Vector3(params.x, params.y, params.z);
-			this.companionSystem.walkTo(this.companionEntity, target);
+			this.companionSystem.walkTo(companion.entity, target);
 		} else {
 			console.error("[ActionHandler] Invalid walk parameters:", params);
 		}
@@ -61,14 +75,17 @@ export class ActionHandler {
 	/**
 	 * 走行アクションを処理
 	 */
-	private handleRun(params: Record<string, unknown>): void {
+	private handleRun(
+		companion: CompanionData,
+		params: Record<string, unknown>,
+	): void {
 		if (
 			typeof params.x === "number" &&
 			typeof params.y === "number" &&
 			typeof params.z === "number"
 		) {
 			const target = new THREE.Vector3(params.x, params.y, params.z);
-			this.companionSystem.runTo(this.companionEntity, target);
+			this.companionSystem.runTo(companion.entity, target);
 		} else {
 			console.error("[ActionHandler] Invalid run parameters:", params);
 		}
@@ -77,9 +94,12 @@ export class ActionHandler {
 	/**
 	 * ジェスチャーアクションを処理
 	 */
-	private handleGesture(params: Record<string, unknown>): void {
+	private handleGesture(
+		companion: CompanionData,
+		params: Record<string, unknown>,
+	): void {
 		if (typeof params.name === "string") {
-			this.companionSystem.playGesture(this.companionEntity, params.name);
+			this.companionSystem.playGesture(companion.entity, params.name);
 		} else {
 			console.error("[ActionHandler] Invalid gesture parameters:", params);
 		}

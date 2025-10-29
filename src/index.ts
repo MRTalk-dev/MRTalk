@@ -27,33 +27,57 @@ async function main() {
 			throw new Error("Required systems failed to initialize");
 		}
 
+		const companionSystem = systems.companionSystem;
+		const meshProcessSystem = systems.meshProcessSystem;
+
 		// NavMeshを初期化
 		await init();
 
-		// コンパニオンを読み込み(VRM + アニメーション + エージェント)
+		// 複数のコンパニオンを読み込み(VRM + アニメーション + エージェント)
 		const companionLoader = new CompanionLoader();
-		const companion = await companionLoader.loadAndSetup(
-			world,
-			systems.companionSystem,
-			systems.meshProcessSystem.getNavMeshManager(),
+		const companions = await Promise.all(
+			CONFIG.COMPANIONS.map((config, index) =>
+				companionLoader.loadAndSetup(
+					world,
+					companionSystem,
+					meshProcessSystem.getNavMeshManager(),
+					config,
+					index * 0.5, // 横に0.5mずつずらして配置
+				),
+			),
+		);
+
+		// ID -> CompanionDataのマップを作成
+		const companionMap = new Map(
+			companions.map((companion) => [companion.id, companion]),
+		);
+
+		// ID -> VoiceVoxClientのマップを作成
+		const voiceClientMap = new Map(
+			CONFIG.COMPANIONS.map((config) => {
+				const companion = companionMap.get(config.id);
+				if (!companion) {
+					throw new Error(`Companion not found: ${config.id}`);
+				}
+				return [
+					config.id,
+					new VoiceVoxClient(CONFIG.VOICEVOX_URL, companion.vrm),
+				];
+			}),
 		);
 
 		// ネットワークをセットアップ
 		const wsClient = new WebSocketClient(CONFIG.FIREHOSE_URL);
-		const voiceVoxClient = new VoiceVoxClient(
-			CONFIG.VOICEVOX_URL,
-			companion.vrm,
-		);
 
 		const actionHandler = new ActionHandler(
-			companion.entity,
+			companionMap,
 			systems.companionSystem,
 		);
 
 		const queryHandler = new QueryHandler(
 			world,
 			systems.meshProcessSystem,
-			voiceVoxClient,
+			voiceClientMap,
 			wsClient,
 		);
 
@@ -61,17 +85,32 @@ async function main() {
 		wsClient.onMessage((msg) => router.route(msg));
 		await wsClient.connect();
 
-		// 音声入力を開始
+		// 音声入力を開始(全コンパニオンにメッセージを送信)
 		const voiceInput = new VoiceInputManager((text) => {
-			console.log(text);
+			console.log(`[VoiceInput] Recognized: ${text}`);
+
+			// 全コンパニオンIDを取得
+			const companionIds = CONFIG.COMPANIONS.map((c) => c.id);
+
+			// 全コンパニオンにメッセージを送信
+			wsClient.send({
+				topic: "messages",
+				body: {
+					jsonrpc: "2.0",
+					method: "message.send",
+					params: {
+						id: crypto.randomUUID(),
+						from: "user",
+						to: companionIds,
+						message: text,
+					},
+				},
+			});
 		});
 		await voiceInput.start();
-
-		console.log("Application の初期化が完了しました");
 	} catch (error) {
-		console.error("Application の初期化に失敗しました:", error);
+		console.error(error);
 	}
 }
 
-// アプリケーションを開始
 main();

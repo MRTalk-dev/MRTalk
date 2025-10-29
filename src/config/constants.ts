@@ -1,3 +1,10 @@
+export interface CompanionConfig {
+	id: string;
+	name: string;
+	vrmPath: string;
+	speakerId: number;
+}
+
 export const CONFIG = {
 	/** WebSocket Firehoseサーバー URL */
 	FIREHOSE_URL: "/firehose",
@@ -8,11 +15,14 @@ export const CONFIG = {
 	/** VOICEVOX TTSサーバー URL */
 	VOICEVOX_URL: "/voicevox",
 
-	/** VOICEVOX 話者ID */
-	VOICEVOX_SPEAKER_ID: 8,
-
-	/** VRMモデルファイルのパス */
-	VRM_PATH: "/natsumi.vrm",
+	COMPANIONS: [
+		{
+			id: "companion_natsumi",
+			name: "natsumi",
+			vrmPath: "/natsumi.vrm",
+			speakerId: 8,
+		},
+	] as CompanionConfig[],
 
 	/** 読み込むアニメーション名のリスト */
 	ANIMATION_NAMES: [
