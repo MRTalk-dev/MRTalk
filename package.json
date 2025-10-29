@@ -39,7 +39,7 @@
 		"@types/three": "^0.178.1",
 		"tsx": "^4.20.6",
 		"typescript": "^5.5.0",
-		"vite": "^7.1.4",
+		"vite": ">=7.1.11",
 		"vite-plugin-mkcert": "^1.17.0"
 	},
 	"engines": {

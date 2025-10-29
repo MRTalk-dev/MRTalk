@@ -67,7 +67,7 @@ importers:
         specifier: ^5.5.0
         version: 5.9.3
       vite:
-        specifier: ^7.1.4
+        specifier: '>=7.1.11'
         version: 7.1.12(@types/node@24.9.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)
       vite-plugin-mkcert:
         specifier: ^1.17.0
