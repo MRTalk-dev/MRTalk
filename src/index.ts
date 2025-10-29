@@ -14,6 +14,7 @@ import * as THREE from "three";
 import Client from "voicevox-client";
 import { loadMixamoAnimation } from "../lib/mixamo/loadMixamoAnimation";
 import { loadVRM } from "../lib/VRM/loadVRM";
+import { VoiceInputManager } from "./audio/VoiceInputManager";
 import { CompanionComponent } from "./companion/CompanionComponent";
 import { CompanionSystem } from "./companion/CompanionSystem";
 import { MeshProcessSystem } from "./mesh";
@@ -149,6 +150,13 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 				}
 			};
 			waitForNavMesh();
+
+			// STT音声入力を開始
+			const voiceInput = new VoiceInputManager();
+			voiceInput.start().catch((error) => {
+				console.error("Failed to start voice input:", error);
+			});
+
 			console.log("Companion setup complete");
 		} catch (error) {
 			console.error("Failed to setup companion:", error);
