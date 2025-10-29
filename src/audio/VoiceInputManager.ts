@@ -1,3 +1,5 @@
+import { CONFIG } from "../config/constants";
+
 export interface VoiceInputConfig {
 	/** STTサーバーのURL */
 	sttServerUrl?: string;
@@ -29,7 +31,7 @@ export class VoiceInputManager {
 		config: VoiceInputConfig = {},
 	) {
 		this.config = {
-			sttServerUrl: config.sttServerUrl ?? "http://localhost:8000",
+			sttServerUrl: config.sttServerUrl ?? CONFIG.STT_URL,
 			volumeThreshold: config.volumeThreshold ?? -50,
 			silenceTimeout: config.silenceTimeout ?? 1500,
 			minRecordingDuration: config.minRecordingDuration ?? 500,

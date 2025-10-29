@@ -22,7 +22,29 @@ export default defineConfig({
 			level: "medium",
 		}),
 	],
-	server: { host: "0.0.0.0", port: 8081, open: true },
+	server: {
+		host: "0.0.0.0",
+		port: 8081,
+		open: true,
+		proxy: {
+			"/stt": {
+				target: "http://127.0.0.1:8000",
+				changeOrigin: true,
+				secure: false,
+			},
+			"/firehose": {
+				target: "http://localhost:8080",
+				changeOrigin: true,
+				ws: true,
+				secure: false,
+			},
+			"/voicevox": {
+				target: "http://127.0.0.1:50021",
+				changeOrigin: true,
+				secure: false,
+			},
+		},
+	},
 	build: {
 		outDir: "dist",
 		sourcemap: process.env.NODE_ENV !== "production",

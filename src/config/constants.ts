@@ -1,9 +1,12 @@
 export const CONFIG = {
 	/** WebSocket Firehoseサーバー URL */
-	FIREHOSE_URL: "ws://localhost:8080",
+	FIREHOSE_URL: "/firehose",
+
+	/**Speech To Text サーバー URL */
+	STT_URL: "/stt",
 
 	/** VOICEVOX TTSサーバー URL */
-	VOICEVOX_URL: "http://127.0.0.1:50021",
+	VOICEVOX_URL: "/voicevox",
 
 	/** VOICEVOX 話者ID */
 	VOICEVOX_SPEAKER_ID: 8,
