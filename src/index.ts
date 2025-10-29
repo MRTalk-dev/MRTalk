@@ -1,3 +1,4 @@
+import type { VRM } from "@pixiv/three-vrm";
 import { init } from "recast-navigation";
 import { type AnimationClip, AnimationMixer, Vector3 } from "three";
 import { loadMixamoAnimation } from "../lib/mixamo/loadMixamoAnimation";
@@ -37,30 +38,32 @@ async function main() {
 	if (mesh) {
 		mesh.onBaked = async () => {
 			try {
-				//コンパニオンのX座標を1ずつずらす
-				let offset = 0;
-
-				// 複数のコンパニオンを読み込み
-				CONFIG.COMPANIONS.forEach(async (config) => {
+				const promises = CONFIG.COMPANIONS.map(async (config, index) => {
+					const offset = index; // offsetを要素番号にする
 					const { gltf } = await loadVRM(config.vrmPath);
-					const vrm = gltf.userData.vrm;
+					const vrm: VRM = gltf.userData.vrm;
 
 					vrm.scene.position.set(offset, 0, 0);
 					world.scene.add(vrm.scene);
 
-					const companionEntity = world.createEntity();
+					const companionEntity = world.createTransformEntity(vrm.scene);
 					companionEntity.addComponent(CompanionComponent);
 
 					const mixer = new AnimationMixer(vrm.scene);
 					const animations: Record<string, AnimationClip> = {};
-					for (const name of CONFIG.ANIMATION_NAMES) {
-						const clip = await loadMixamoAnimation(
-							`/animations/${name}.fbx`,
-							vrm,
-						);
-						if (clip) {
-							animations[name] = clip;
-						}
+
+					// 各アニメーションを並列読み込み
+					const clips = await Promise.all(
+						CONFIG.ANIMATION_NAMES.map(async (name) => {
+							const clip = await loadMixamoAnimation(
+								`/animations/${name}.fbx`,
+								vrm,
+							);
+							return { name, clip };
+						}),
+					);
+					for (const { name, clip } of clips) {
+						if (clip) animations[name] = clip;
 					}
 
 					const crowd = navMesh.getCrowd();
@@ -78,8 +81,10 @@ async function main() {
 					);
 					companion.playAnimation("idle", true);
 					companions.set(config.id, companion);
-					offset++;
 				});
+
+				// 全てのコンパニオン読み込みが完了するまで待つ
+				await Promise.all(promises);
 
 				const wsClient = new WebSocketClient(CONFIG.FIREHOSE_URL);
 				const actionHandler = new ActionHandler(companions);
@@ -96,8 +101,9 @@ async function main() {
 				await wsClient.connect();
 
 				/*
-        // 音声入力を開始(全コンパニオンにメッセージを送信)
+				// 音声入力を開始(全コンパニオンにメッセージを送信)
 				const voiceInput = new VoiceInputManager((text) => {
+					voicevox.stopAll();
 					console.log(`[VoiceInput] Recognized: ${text}`);
 					// 全コンパニオンIDを取得
 					const companionIds = CONFIG.COMPANIONS.map((c) => c.id);

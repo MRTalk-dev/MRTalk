@@ -87,6 +87,7 @@ export class QueryHandler {
 			};
 		}
 		if (emotion) companion.setExpression(emotion);
+		this.voicevox.stopAll();
 		await this.voicevox.speak(body.message, companion.config.speakerId);
 		return {
 			success: true,

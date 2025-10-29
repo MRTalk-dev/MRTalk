@@ -2,6 +2,7 @@ import Client from "voicevox-client";
 
 export class VOICEVOXClient {
 	private client: Client;
+	private activeAudios: Set<HTMLAudioElement> = new Set();
 
 	constructor(serverUrl: string) {
 		this.client = new Client(serverUrl);
@@ -10,13 +11,12 @@ export class VOICEVOXClient {
 	/**
 	 * オプションの表情付きで音声を合成・再生
 	 * @param message 読み上げるテキスト
-	 * @param emotion オプションの表情/感情
+	 * @param speaker 話者ID
 	 */
 	async speak(message: string, speaker: number): Promise<void> {
 		console.log(`[VoiceVox] Speaking: "${message}"`);
 		try {
 			const audioBlob = await this.synthesizeAudio(message, speaker);
-			// 音声を再生
 			await this.playAudio(audioBlob);
 		} catch (error) {
 			console.error("[VoiceVox] Failed to speak:", error);
@@ -44,17 +44,39 @@ export class VOICEVOXClient {
 			const url = URL.createObjectURL(audioBlob);
 			const audio = new Audio(url);
 
+			// 再生リストに追加
+			this.activeAudios.add(audio);
+
 			audio.addEventListener("ended", () => {
+				this.activeAudios.delete(audio);
 				URL.revokeObjectURL(url);
 				resolve();
 			});
 
 			audio.addEventListener("error", (error) => {
+				this.activeAudios.delete(audio);
 				URL.revokeObjectURL(url);
 				reject(error);
 			});
 
 			audio.play().catch(reject);
 		});
+	}
+
+	/**
+	 * すべての再生中の音声を停止
+	 */
+	stopAll(): void {
+		for (const audio of this.activeAudios) {
+			try {
+				audio.pause();
+				audio.currentTime = 0; // 再生位置リセット
+				URL.revokeObjectURL(audio.src); // メモリ解放
+			} catch (e) {
+				console.warn("[VoiceVox] Failed to stop audio:", e);
+			}
+		}
+		this.activeAudios.clear();
+		console.log("[VoiceVox] All audio stopped");
 	}
 }
