@@ -2,13 +2,13 @@ import type { Entity } from "@iwsdk/core";
 import { CompanionComponent, CompanionState } from "./CompanionComponent";
 
 /**
- * State manager for companion entities
- * Handles state transitions and component value updates
+ * companion entity の state 管理
+ * state 遷移と component 値の更新を処理
  */
 export class CompanionStateManager {
 	/**
-	 * Transition to Idle state
-	 * @param entity - The companion entity
+	 * Idle state へ遷移
+	 * @param entity - companion entity
 	 */
 	transitionToIdle(entity: Entity): void {
 		entity.setValue(CompanionComponent, "state", CompanionState.Idle);
@@ -16,9 +16,8 @@ export class CompanionStateManager {
 	}
 
 	/**
-	 * Transition to Walk state
-	 * @param entity - The companion entity
-	 * @param target - Target position (not stored, managed by NavMesh)
+	 * Walk state へ遷移
+	 * @param entity - companion entity
 	 */
 	transitionToWalk(entity: Entity): void {
 		entity.setValue(CompanionComponent, "state", CompanionState.Walk);
@@ -26,9 +25,8 @@ export class CompanionStateManager {
 	}
 
 	/**
-	 * Transition to Run state
-	 * @param entity - The companion entity
-	 * @param target - Target position (not stored, managed by NavMesh)
+	 * Run state へ遷移
+	 * @param entity - companion entity
 	 */
 	transitionToRun(entity: Entity): void {
 		entity.setValue(CompanionComponent, "state", CompanionState.Run);
@@ -36,9 +34,9 @@ export class CompanionStateManager {
 	}
 
 	/**
-	 * Transition to Gesture state
-	 * @param entity - The companion entity
-	 * @param gestureName - Name of gesture to perform
+	 * Gesture state へ遷移
+	 * @param entity - companion entity
+	 * @param gestureName - 実行する gesture 名
 	 */
 	transitionToGesture(entity: Entity, gestureName: string): void {
 		entity.setValue(CompanionComponent, "state", CompanionState.Gesture);
@@ -46,27 +44,27 @@ export class CompanionStateManager {
 	}
 
 	/**
-	 * Get current state of companion
-	 * @param entity - The companion entity
-	 * @returns Current CompanionState
+	 * companion の現在の state を取得
+	 * @param entity - companion entity
+	 * @returns 現在の CompanionState
 	 */
 	getCurrentState(entity: Entity): CompanionState {
 		return entity.getValue(CompanionComponent, "state") as CompanionState;
 	}
 
 	/**
-	 * Check if companion has a movement target
-	 * @param entity - The companion entity
-	 * @returns True if has target
+	 * companion が移動 target を持っているか確認
+	 * @param entity - companion entity
+	 * @returns target を持っている場合 true
 	 */
 	hasTarget(entity: Entity): boolean {
 		return entity.getValue(CompanionComponent, "hasTarget") as boolean;
 	}
 
 	/**
-	 * Get agent index for NavMesh
-	 * @param entity - The companion entity
-	 * @returns Agent index or null
+	 * NavMesh の agent index を取得
+	 * @param entity - companion entity
+	 * @returns agent index または null
 	 */
 	getAgentIndex(entity: Entity): number | null {
 		const index = entity.getValue(CompanionComponent, "agentIndex") as number;

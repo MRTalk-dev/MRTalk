@@ -1,11 +1,11 @@
 export interface VoiceInputConfig {
 	/** STTサーバーのURL */
 	sttServerUrl?: string;
-	/** 音声検出の音量閾値（dB） */
+	/** 音声検出の音量閾値(dB) */
 	volumeThreshold?: number;
-	/** 無音判定時間（ミリ秒） */
+	/** 無音判定時間(ミリ秒) */
 	silenceTimeout?: number;
-	/** 最小録音時間（ミリ秒） */
+	/** 最小録音時間(ミリ秒) */
 	minRecordingDuration?: number;
 }
 
@@ -20,15 +20,21 @@ export class VoiceInputManager {
 	private silenceTimer: number | null = null;
 	private audioChunks: Blob[] = [];
 
+	private onRecognize: (text: string) => void;
+
 	private config: Required<VoiceInputConfig>;
 
-	constructor(config: VoiceInputConfig = {}) {
+	constructor(
+		onRecognize: (text: string) => void,
+		config: VoiceInputConfig = {},
+	) {
 		this.config = {
 			sttServerUrl: config.sttServerUrl ?? "http://localhost:8000",
 			volumeThreshold: config.volumeThreshold ?? -50,
 			silenceTimeout: config.silenceTimeout ?? 1500,
 			minRecordingDuration: config.minRecordingDuration ?? 500,
 		};
+		this.onRecognize = onRecognize;
 	}
 
 	/**
@@ -111,7 +117,7 @@ export class VoiceInputManager {
 		const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
 		this.analyser.getByteFrequencyData(dataArray);
 
-		// 平均音量を計算（dB）
+		// 平均音量を計算(dB)
 		const average =
 			dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
 		const volumeDb = 20 * Math.log10(average / 255);
@@ -187,17 +193,13 @@ export class VoiceInputManager {
 		if (this.audioChunks.length === 0) return;
 
 		// 音声BlobをFormDataに変換
-		const audioBlob = new Blob(this.audioChunks, { type: "audio/webm" });
+		const audioBlob = new Blob(this.audioChunks, { type: "audio/wav" });
 		this.audioChunks = [];
-
-		console.log(
-			`[VoiceInput] Sending audio to STT server (${audioBlob.size} bytes)`,
-		);
 
 		try {
 			// STTサーバーに送信
 			const formData = new FormData();
-			formData.append("file", audioBlob, "audio.webm");
+			formData.append("file", audioBlob, "audio.wav");
 
 			const response = await fetch(this.config.sttServerUrl, {
 				method: "POST",
@@ -209,7 +211,7 @@ export class VoiceInputManager {
 			}
 
 			const result = await response.json();
-			console.log("[VoiceInput] Recognition result:", result.text);
+			this.onRecognize(result.text);
 		} catch (error) {
 			console.error("[VoiceInput] STT request failed:", error);
 		}

@@ -1,19 +1,19 @@
 import * as THREE from "three";
 
 /**
- * Animation controller for VRM characters
- * Handles animation playback, crossfading, and event management
+ * VRM キャラクターの animation controller
+ * animation の再生、crossfade、event 管理を処理
  */
 export class CompanionAnimationController {
 	/**
-	 * Play an animation with crossfade support
+	 * crossfade サポート付きで animation を再生
 	 * @param mixer - THREE.AnimationMixer instance
-	 * @param animations - Record of available animation clips
-	 * @param currentAction - Currently playing action (for fade out)
-	 * @param animationName - Name of animation to play
-	 * @param loop - Whether to loop the animation
-	 * @param onFinished - Callback for non-looping animations
-	 * @returns The new AnimationAction that was started
+	 * @param animations - 利用可能な animation clip の Record
+	 * @param currentAction - 現在再生中の action(fade out 用)
+	 * @param animationName - 再生する animation 名
+	 * @param loop - animation をループするかどうか
+	 * @param onFinished - 非ループ animation の callback
+	 * @returns 開始された新しい AnimationAction
 	 */
 	playAnimation(
 		mixer: THREE.AnimationMixer,
@@ -23,7 +23,7 @@ export class CompanionAnimationController {
 		loop: boolean,
 		onFinished?: () => void,
 	): THREE.AnimationAction | null {
-		// Check if animation exists
+		// animation が存在するか確認
 		if (!animations[animationName]) {
 			console.warn(`Animation ${animationName} not found`);
 			return null;
@@ -32,12 +32,12 @@ export class CompanionAnimationController {
 		const newClip = animations[animationName];
 		const newAction = mixer.clipAction(newClip);
 
-		// Fade out current action
+		// 現在の action を fade out
 		if (currentAction && currentAction !== newAction) {
 			currentAction.fadeOut(0.3);
 		}
 
-		// Setup new action with crossfade
+		// crossfade 付きで新しい action をセットアップ
 		newAction.reset();
 		newAction.fadeIn(0.3);
 		newAction.setLoop(
@@ -47,7 +47,7 @@ export class CompanionAnimationController {
 		newAction.clampWhenFinished = true;
 		newAction.play();
 
-		// Handle finished event for non-looping animations
+		// 非ループ animation の finished event を処理
 		if (!loop && onFinished) {
 			const onFinishedHandler = (e: { action: THREE.AnimationAction }) => {
 				if (e.action === newAction) {

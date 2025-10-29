@@ -16,8 +16,8 @@ interface CompanionData {
 }
 
 /**
- * ECS System for managing AI companions
- * Orchestrates animation, movement, and state controllers
+ * AI companion を管理する ECS System
+ * animation、movement、state controller を統括
  */
 export class CompanionSystem extends createSystem({
 	companions: { required: [CompanionComponent] },
@@ -42,12 +42,12 @@ export class CompanionSystem extends createSystem({
 	}
 
 	update(delta: number) {
-		// Update NavMesh crowd simulation
+		// NavMesh crowd simulation を更新
 		if (this.navMeshManager) {
 			this.navMeshManager.update(delta);
 		}
 
-		// Update each companion
+		// 各 companion を更新
 		for (const entity of this.queries.companions.entities) {
 			this.updateCompanion(entity, delta);
 		}
@@ -57,16 +57,16 @@ export class CompanionSystem extends createSystem({
 		const data = this.companionDataMap.get(entity.index);
 		if (!data || !data.vrm || !data.mixer) return;
 
-		// Update VRM and animations
+		// VRM と animation を更新
 		data.vrm.update(delta);
 		data.mixer.update(delta);
 
-		// Get current state
+		// 現在の state を取得
 		const state = this.stateManager.getCurrentState(entity);
 		const hasTarget = this.stateManager.hasTarget(entity);
 		const agentIndex = this.stateManager.getAgentIndex(entity);
 
-		// Handle movement states (Walk/Run)
+		// 移動 state (Walk/Run) を処理
 		if (
 			(state === CompanionState.Walk || state === CompanionState.Run) &&
 			agentIndex !== null &&
@@ -89,18 +89,18 @@ export class CompanionSystem extends createSystem({
 
 		if (!agentPos || !agentVel) return;
 
-		// Update position
+		// 位置を更新
 		this.movementController.updatePosition(data.vrm.scene, agentPos);
 
 		if (!hasTarget) return;
 
-		// Check arrival
+		// 到着を確認
 		if (this.movementController.checkArrival(agentVel)) {
 			this.transitionToIdle(entity);
 			return;
 		}
 
-		// Update rotation to face movement direction
+		// 移動方向を向くように回転を更新
 		this.movementController.updateRotation(data.vrm.scene, agentVel);
 	}
 
@@ -142,11 +142,11 @@ export class CompanionSystem extends createSystem({
 			return;
 		}
 
-		// Set walk speed and target
+		// walk speed と target を設定
 		this.navMeshManager.setAgentSpeed(agentIndex, 1.0);
 		this.navMeshManager.setAgentTarget(agentIndex, target);
 
-		// Transition state
+		// state を遷移
 		this.stateManager.transitionToWalk(entity);
 		this.playAnimation(entity, "walk", true);
 	}
@@ -158,11 +158,11 @@ export class CompanionSystem extends createSystem({
 			return;
 		}
 
-		// Set run speed (2.5x faster than walk)
+		// run speed を設定(walk の 2.5 倍)
 		this.navMeshManager.setAgentSpeed(agentIndex, 2.5);
 		this.navMeshManager.setAgentTarget(agentIndex, target);
 
-		// Transition state
+		// state を遷移
 		this.stateManager.transitionToRun(entity);
 		this.playAnimation(entity, "run", true);
 	}
@@ -174,10 +174,10 @@ export class CompanionSystem extends createSystem({
 			return;
 		}
 
-		// Transition to gesture state
+		// gesture state へ遷移
 		this.stateManager.transitionToGesture(entity, gestureName);
 
-		// Play gesture animation (non-looping, return to idle when finished)
+		// gesture animation を再生(非ループ、完了後 idle に戻る)
 		this.playAnimation(entity, gestureName, false, () => {
 			this.transitionToIdle(entity);
 		});
