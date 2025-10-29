@@ -37,12 +37,15 @@ async function main() {
 	if (mesh) {
 		mesh.onBaked = async () => {
 			try {
+				//コンパニオンのX座標を1ずつずらす
+				let offset = 0;
+
 				// 複数のコンパニオンを読み込み
 				CONFIG.COMPANIONS.forEach(async (config) => {
 					const { gltf } = await loadVRM(config.vrmPath);
 					const vrm = gltf.userData.vrm;
 
-					vrm.scene.position.set(0, 0, -1);
+					vrm.scene.position.set(offset, 0, 0);
 					world.scene.add(vrm.scene);
 
 					const companionEntity = world.createEntity();
@@ -63,7 +66,7 @@ async function main() {
 					const crowd = navMesh.getCrowd();
 					if (!crowd) return;
 
-					const agent = new NavMeshAgent(crowd, new Vector3(0, 0, 0));
+					const agent = new NavMeshAgent(crowd, new Vector3(offset, 0, 0));
 					const companion = new Companion(
 						config,
 						companionEntity,
@@ -75,6 +78,7 @@ async function main() {
 					);
 					companion.playAnimation("idle", true);
 					companions.set(config.id, companion);
+					offset++;
 				});
 
 				const wsClient = new WebSocketClient(CONFIG.FIREHOSE_URL);

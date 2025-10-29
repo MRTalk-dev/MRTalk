@@ -1,9 +1,6 @@
 import { DirectionalLight, SessionMode, World } from "@iwsdk/core";
 import { CONFIG } from "../config/constants";
 
-/**
- * Worldの作成と基本的なシーン設定を管理
- */
 export class WorldManager {
 	/**
 	 * 新しいWorldインスタンスを作成して設定

@@ -15,12 +15,25 @@ export const CONFIG = {
 	/** VOICEVOX TTSサーバー URL */
 	VOICEVOX_URL: "/voicevox",
 
+	/** コンパニオンリスト */
 	COMPANIONS: [
 		{
-			id: "companion_natsumi",
+			id: "companion_natsumi", //aikyo上の一意なid
 			name: "natsumi",
 			vrmPath: "/natsumi.vrm",
-			speakerId: 8,
+			speakerId: 8, //VOICEVOX 話者ID
+		},
+		{
+			id: "companion_aya",
+			name: "aya",
+			vrmPath: "/aya.vrm",
+			speakerId: 20,
+		},
+		{
+			id: "companion_kyoko",
+			name: "kyoko",
+			vrmPath: "/kyoko.vrm",
+			speakerId: 2,
 		},
 	] as CompanionConfig[],
 
