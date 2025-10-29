@@ -1,5 +1,5 @@
 {
-  description = "Python Shell";
+  description = "Shell";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -24,7 +24,6 @@
             pkgs.uv
             pkgs.pnpm
             pkgs.nodejs_24
-            pkgs.claude-code
           ];
           shellHook = ''
             echo "uv version: $(uv --version)"
