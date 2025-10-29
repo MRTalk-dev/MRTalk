@@ -6,21 +6,13 @@ import {
 	XRPlane,
 } from "@iwsdk/core";
 import { CompanionComponent } from "../companion/CompanionComponent";
-import { CompanionSystem } from "../companion/CompanionSystem";
-import { MeshProcessSystem } from "../mesh";
+import { MeshProcessSystem } from "../navmesh/mesh";
 
-/**
- * 登録されたシステムへの参照
- */
 export interface SystemReferences {
 	sceneUnderstandingSystem: SceneUnderstandingSystem | undefined;
 	meshProcessSystem: MeshProcessSystem | undefined;
-	companionSystem: CompanionSystem | undefined;
 }
 
-/**
- * システムとコンポーネントの登録を管理
- */
 export class SystemRegistry {
 	/**
 	 * すべてのシステムとコンポーネントをWorldに登録
@@ -31,8 +23,7 @@ export class SystemRegistry {
 		// system を登録
 		world
 			.registerSystem(SceneUnderstandingSystem)
-			.registerSystem(MeshProcessSystem)
-			.registerSystem(CompanionSystem);
+			.registerSystem(MeshProcessSystem);
 
 		// component を登録
 		world
@@ -44,16 +35,13 @@ export class SystemRegistry {
 		// system 参照を取得
 		const sceneUnderstandingSystem = world.getSystem(SceneUnderstandingSystem);
 		const meshProcessSystem = world.getSystem(MeshProcessSystem);
-		const companionSystem = world.getSystem(CompanionSystem);
 
 		// system を設定
 		this.configureSceneUnderstanding(sceneUnderstandingSystem);
-		this.linkNavMeshToCompanion(meshProcessSystem, companionSystem);
 
 		return {
 			sceneUnderstandingSystem,
 			meshProcessSystem,
-			companionSystem,
 		};
 	}
 
@@ -65,19 +53,6 @@ export class SystemRegistry {
 	): void {
 		if (system) {
 			system.config.showWireFrame.value = false;
-		}
-	}
-
-	/**
-	 * NavMeshマネージャーをコンパニオンシステムにリンク
-	 */
-	private linkNavMeshToCompanion(
-		meshProcessSystem: MeshProcessSystem | undefined,
-		companionSystem: CompanionSystem | undefined,
-	): void {
-		if (meshProcessSystem && companionSystem) {
-			const navMeshManager = meshProcessSystem.getNavMeshManager();
-			companionSystem.setNavMeshManager(navMeshManager);
 		}
 	}
 }

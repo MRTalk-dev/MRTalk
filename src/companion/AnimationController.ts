@@ -1,10 +1,6 @@
 import * as THREE from "three";
 
-/**
- * VRM キャラクターの animation controller
- * animation の再生、crossfade、event 管理を処理
- */
-export class CompanionAnimationController {
+export class AnimationController {
 	/**
 	 * crossfade サポート付きで animation を再生
 	 * @param mixer - THREE.AnimationMixer instance

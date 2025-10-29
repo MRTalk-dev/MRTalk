@@ -16,9 +16,9 @@
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^2.0.27",
-		"@aikyo/firehose": "^1.5.3",
-		"@aikyo/server": "^1.4.3",
-		"@aikyo/utils": "^1.4.1",
+		"@aikyo/firehose": "latest",
+		"@aikyo/server": "latest",
+		"@aikyo/utils": "latest",
 		"@iwsdk/core": "0.1.0",
 		"@pixiv/three-vrm": "^3.4.2",
 		"@recast-navigation/three": "^0.43.0",

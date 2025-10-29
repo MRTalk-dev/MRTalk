@@ -1,24 +1,14 @@
 import * as THREE from "three";
-import type { CompanionData } from "../companion/CompanionLoader";
-import type { CompanionSystem } from "../companion/CompanionSystem";
+import type { Companion } from "../companion/Companion";
 
-/**
- * アクションメッセージのパラメータ
- */
 export interface ActionParams {
 	name: string;
 	params: Record<string, unknown>;
 	from: string;
 }
 
-/**
- * ネットワークからの"action.send"メッセージを処理
- */
 export class ActionHandler {
-	constructor(
-		private companionMap: Map<string, CompanionData>,
-		private companionSystem: CompanionSystem,
-	) {}
+	constructor(private companionMap: Map<string, Companion>) {}
 
 	/**
 	 * アクションメッセージを処理
@@ -57,7 +47,7 @@ export class ActionHandler {
 	 * 歩行アクションを処理
 	 */
 	private handleWalk(
-		companion: CompanionData,
+		companion: Companion,
 		params: Record<string, unknown>,
 	): void {
 		if (
@@ -66,7 +56,7 @@ export class ActionHandler {
 			typeof params.z === "number"
 		) {
 			const target = new THREE.Vector3(params.x, params.y, params.z);
-			this.companionSystem.walkTo(companion.entity, target);
+			companion.walkTo(target);
 		} else {
 			console.error("[ActionHandler] Invalid walk parameters:", params);
 		}
@@ -76,7 +66,7 @@ export class ActionHandler {
 	 * 走行アクションを処理
 	 */
 	private handleRun(
-		companion: CompanionData,
+		companion: Companion,
 		params: Record<string, unknown>,
 	): void {
 		if (
@@ -85,7 +75,7 @@ export class ActionHandler {
 			typeof params.z === "number"
 		) {
 			const target = new THREE.Vector3(params.x, params.y, params.z);
-			this.companionSystem.runTo(companion.entity, target);
+			companion.runTo(target);
 		} else {
 			console.error("[ActionHandler] Invalid run parameters:", params);
 		}
@@ -95,11 +85,11 @@ export class ActionHandler {
 	 * ジェスチャーアクションを処理
 	 */
 	private handleGesture(
-		companion: CompanionData,
+		companion: Companion,
 		params: Record<string, unknown>,
 	): void {
 		if (typeof params.name === "string") {
-			this.companionSystem.playGesture(companion.entity, params.name);
+			companion.playGesture(params.name);
 		} else {
 			console.error("[ActionHandler] Invalid gesture parameters:", params);
 		}

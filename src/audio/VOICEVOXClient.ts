@@ -1,17 +1,9 @@
-import type { VRM } from "@pixiv/three-vrm";
 import Client from "voicevox-client";
-import { CONFIG } from "../config/constants";
 
-/**
- * VOICEVOX 音声合成クライアント
- */
-export class VoiceVoxClient {
+export class VOICEVOXClient {
 	private client: Client;
 
-	constructor(
-		serverUrl: string,
-		private vrm: VRM,
-	) {
+	constructor(serverUrl: string) {
 		this.client = new Client(serverUrl);
 	}
 
@@ -20,27 +12,12 @@ export class VoiceVoxClient {
 	 * @param message 読み上げるテキスト
 	 * @param emotion オプションの表情/感情
 	 */
-	async speak(message: string, emotion?: string): Promise<void> {
-		console.log(`[VoiceVox] Speaking: "${message}" with emotion: ${emotion}`);
-
+	async speak(message: string, speaker: number): Promise<void> {
+		console.log(`[VoiceVox] Speaking: "${message}"`);
 		try {
-			const audioBlob = await this.synthesizeAudio(
-				message,
-				CONFIG.VOICEVOX_SPEAKER_ID,
-			);
-
-			// 表情を設定(指定されている場合)
-			if (emotion) {
-				this.setExpression(emotion);
-			}
-
+			const audioBlob = await this.synthesizeAudio(message, speaker);
 			// 音声を再生
 			await this.playAudio(audioBlob);
-
-			// 発話後に表情をリセット
-			if (emotion && this.vrm.expressionManager) {
-				this.vrm.expressionManager.setValue(emotion, 0.0);
-			}
 		} catch (error) {
 			console.error("[VoiceVox] Failed to speak:", error);
 			throw error;
@@ -79,14 +56,5 @@ export class VoiceVoxClient {
 
 			audio.play().catch(reject);
 		});
-	}
-
-	/**
-	 * VRMの表情を設定
-	 */
-	private setExpression(emotion: string): void {
-		if (this.vrm.expressionManager) {
-			this.vrm.expressionManager.setValue(emotion, 1.0);
-		}
 	}
 }

@@ -1,10 +1,6 @@
 import * as THREE from "three";
 
-/**
- * VRM キャラクターの movement controller
- * 位置の同期と移動方向への回転を処理
- */
-export class CompanionMovementController {
+export class MovementController {
 	private static readonly ARRIVAL_SPEED_THRESHOLD = 0.1;
 	private static readonly ROTATION_LERP_FACTOR = 0.1;
 
@@ -41,7 +37,7 @@ export class CompanionMovementController {
 			vrmScene.quaternion.copy(currentRotation);
 			vrmScene.quaternion.slerp(
 				targetRotation,
-				CompanionMovementController.ROTATION_LERP_FACTOR,
+				MovementController.ROTATION_LERP_FACTOR,
 			);
 		}
 	}
@@ -53,6 +49,6 @@ export class CompanionMovementController {
 	 */
 	checkArrival(velocity: THREE.Vector3): boolean {
 		const speed = velocity.length();
-		return speed < CompanionMovementController.ARRIVAL_SPEED_THRESHOLD;
+		return speed < MovementController.ARRIVAL_SPEED_THRESHOLD;
 	}
 }

@@ -1,11 +1,9 @@
 import type { World } from "@iwsdk/core";
-import type { VoiceVoxClient } from "../audio/VoiceVoxClient";
-import type { MeshProcessSystem } from "../mesh";
+import type { VOICEVOXClient } from "../audio/VOICEVOXClient";
+import type { Companion } from "../companion/Companion";
+import type { MeshProcessSystem } from "../navmesh/mesh";
 import type { WebSocketClient } from "./WebSocketClient";
 
-/**
- * クエリメッセージの構造
- */
 export interface QueryMessage {
 	id: string;
 	params: {
@@ -15,21 +13,16 @@ export interface QueryMessage {
 	};
 }
 
-/**
- * クエリ結果の構造
- */
 export type QueryResult =
 	| { success: boolean; body: Record<string, unknown> }
 	| { success: boolean; error: string };
 
-/**
- * ネットワークからの"query.send"メッセージを処理
- */
 export class QueryHandler {
 	constructor(
 		private world: World,
+		private companions: Map<string, Companion>,
+		private voicevox: VOICEVOXClient,
 		private meshProcessSystem: MeshProcessSystem | undefined,
-		private voiceClientMap: Map<string, VoiceVoxClient>,
 		private ws: WebSocketClient,
 	) {}
 
@@ -85,19 +78,16 @@ export class QueryHandler {
 				error: "messageが不正です。",
 			};
 		}
-
-		// fromフィールドから該当するVoiceVoxClientを取得
-		const voiceClient = this.voiceClientMap.get(from);
-		if (!voiceClient) {
+		const emotion = typeof body.emotion === "string" ? body.emotion : undefined;
+		const companion = this.companions.get(from);
+		if (!companion) {
 			return {
 				success: false,
-				error: `VoiceVoxClient not found for companion: ${from}`,
+				error: "そのコンパニオンは登録されていません。",
 			};
 		}
-
-		const emotion = typeof body.emotion === "string" ? body.emotion : undefined;
-		await voiceClient.speak(body.message, emotion);
-
+		if (emotion) companion.setExpression(emotion);
+		await this.voicevox.speak(body.message, companion.config.speakerId);
 		return {
 			success: true,
 			body: { success: true },

@@ -2,6 +2,72 @@ import { threeToSoloNavMesh } from "@recast-navigation/three";
 import { Crowd, type NavMesh } from "recast-navigation";
 import * as THREE from "three";
 
+export class NavMeshAgent {
+	private crowd: Crowd;
+	private agentIndex: number;
+
+	constructor(crowd: Crowd, position: THREE.Vector3) {
+		this.crowd = crowd;
+		const agent = this.crowd.addAgent(
+			{
+				x: position.x,
+				y: position.y,
+				z: position.z,
+			},
+			{ radius: 0.1, maxSpeed: 1 },
+		);
+		this.agentIndex = agent.agentIndex;
+	}
+
+	get index() {
+		return this.agentIndex;
+	}
+
+	setSpeed(maxSpeed: number): void {
+		const agent = this.crowd.getAgent(this.agentIndex);
+		if (!agent) {
+			return;
+		}
+
+		agent.maxSpeed = maxSpeed;
+	}
+
+	setTarget(target: THREE.Vector3): boolean {
+		const agent = this.crowd.getAgent(this.agentIndex);
+		if (!agent) {
+			return false;
+		}
+
+		agent.requestMoveTarget({
+			x: target.x,
+			y: target.y,
+			z: target.z,
+		});
+
+		return true;
+	}
+
+	getPosition(): THREE.Vector3 | null {
+		const agent = this.crowd.getAgent(this.agentIndex);
+		if (!agent) {
+			return null;
+		}
+
+		const pos = agent.position();
+		return new THREE.Vector3(pos.x, pos.y, pos.z);
+	}
+
+	getVelocity(): THREE.Vector3 | null {
+		const agent = this.crowd.getAgent(this.agentIndex);
+		if (!agent) {
+			return null;
+		}
+
+		const vel = agent.velocity();
+		return new THREE.Vector3(vel.x, vel.y, vel.z);
+	}
+}
+
 export class NavMeshManager {
 	private navMesh: NavMesh | null = null;
 	private crowd: Crowd | null = null;
@@ -38,82 +104,8 @@ export class NavMeshManager {
 		}
 	}
 
-	addAgent(position: THREE.Vector3): number | null {
-		if (!this.crowd || !this.navMesh) {
-			console.warn("NavMesh not ready");
-			return null;
-		}
-
-		const agent = this.crowd.addAgent(
-			{
-				x: position.x,
-				y: position.y,
-				z: position.z,
-			},
-			{ radius: 0.1, maxSpeed: 1 },
-		);
-
-		return agent.agentIndex;
-	}
-
-	setAgentSpeed(agentIndex: number, maxSpeed: number): void {
-		if (!this.crowd) {
-			return;
-		}
-
-		const agent = this.crowd.getAgent(agentIndex);
-		if (!agent) {
-			return;
-		}
-
-		agent.maxSpeed = maxSpeed;
-	}
-
-	setAgentTarget(agentIndex: number, target: THREE.Vector3): boolean {
-		if (!this.crowd || !this.navMesh) {
-			return false;
-		}
-
-		const agent = this.crowd.getAgent(agentIndex);
-		if (!agent) {
-			return false;
-		}
-
-		agent.requestMoveTarget({
-			x: target.x,
-			y: target.y,
-			z: target.z,
-		});
-
-		return true;
-	}
-
-	getAgentPosition(agentIndex: number): THREE.Vector3 | null {
-		if (!this.crowd) {
-			return null;
-		}
-
-		const agent = this.crowd.getAgent(agentIndex);
-		if (!agent) {
-			return null;
-		}
-
-		const pos = agent.position();
-		return new THREE.Vector3(pos.x, pos.y, pos.z);
-	}
-
-	getAgentVelocity(agentIndex: number): THREE.Vector3 | null {
-		if (!this.crowd) {
-			return null;
-		}
-
-		const agent = this.crowd.getAgent(agentIndex);
-		if (!agent) {
-			return null;
-		}
-
-		const vel = agent.velocity();
-		return new THREE.Vector3(vel.x, vel.y, vel.z);
+	getCrowd(): Crowd | null {
+		return this.crowd;
 	}
 
 	update(deltaTime: number) {

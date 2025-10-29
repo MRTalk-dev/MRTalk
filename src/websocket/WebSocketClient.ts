@@ -1,15 +1,9 @@
-/**
- * JSON-RPCメッセージの型
- */
 export interface JSONRPCMessage {
 	method: string;
 	params?: unknown;
 	id?: string;
 }
 
-/**
- * WebSocket接続とメッセージ処理を管理
- */
 export class WebSocketClient {
 	private ws: WebSocket | null = null;
 	private messageCallbacks: ((message: JSONRPCMessage) => void)[] = [];

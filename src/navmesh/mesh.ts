@@ -1,10 +1,11 @@
 import { createSystem, XRMesh } from "@iwsdk/core";
 import * as THREE from "three";
-import { NavMeshManager } from "./navmesh/NavMeshManager";
+import { NavMeshManager } from "./NavMeshManager";
 
 export class MeshProcessSystem extends createSystem({
 	meshEntities: { required: [XRMesh] },
 }) {
+	onBaked: () => void = () => {};
 	private navMeshManager!: NavMeshManager;
 	private globalMeshes: THREE.Mesh[] = [];
 	private furnitureEntities: Array<{
@@ -14,11 +15,9 @@ export class MeshProcessSystem extends createSystem({
 
 	init() {
 		this.navMeshManager = new NavMeshManager();
-
 		this.queries.meshEntities.subscribe("qualify", (entity) => {
 			const isBounded = entity.getValue(XRMesh, "isBounded3D");
 			const semanticLabel = entity.getValue(XRMesh, "semanticLabel");
-
 			if (isBounded && semanticLabel && entity.object3D) {
 				console.log("家具", entity);
 				this.furnitureEntities.push({
@@ -42,6 +41,7 @@ export class MeshProcessSystem extends createSystem({
 				`Baking NavMesh from ${this.globalMeshes.length} global meshes`,
 			);
 			await this.navMeshManager.bakeNavMesh(this.globalMeshes);
+			this.onBaked();
 		}
 	}
 

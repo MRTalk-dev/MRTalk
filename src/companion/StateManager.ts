@@ -1,11 +1,7 @@
 import type { Entity } from "@iwsdk/core";
 import { CompanionComponent, CompanionState } from "./CompanionComponent";
 
-/**
- * companion entity の state 管理
- * state 遷移と component 値の更新を処理
- */
-export class CompanionStateManager {
+export class StateManager {
 	/**
 	 * Idle state へ遷移
 	 * @param entity - companion entity
@@ -59,15 +55,5 @@ export class CompanionStateManager {
 	 */
 	hasTarget(entity: Entity): boolean {
 		return entity.getValue(CompanionComponent, "hasTarget") as boolean;
-	}
-
-	/**
-	 * NavMesh の agent index を取得
-	 * @param entity - companion entity
-	 * @returns agent index または null
-	 */
-	getAgentIndex(entity: Entity): number | null {
-		const index = entity.getValue(CompanionComponent, "agentIndex") as number;
-		return index >= 0 ? index : null;
 	}
 }
