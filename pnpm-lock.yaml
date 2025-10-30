@@ -29,6 +29,9 @@ importers:
       '@recast-navigation/three':
         specifier: ^0.43.0
         version: 0.43.0(@types/three@0.178.1)(super-three@0.177.0)
+      '@ricky0123/vad-web':
+        specifier: ^0.0.29
+        version: 0.0.29
       iwer:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2031,6 +2034,9 @@ packages:
     peerDependencies:
       '@redis/client': ^5.9.0
 
+  '@ricky0123/vad-web@0.0.29':
+    resolution: {integrity: sha512-natq2FfiEdCv2LcXpmA+U5+wz7QoPgOe2QcwcehUIcFSfZrRnJVAC5H4MCL5Z2xOp7QK6nz53y/tyJLWFVx6TA==}
+
   '@rollup/rollup-android-arm-eabi@4.52.5':
     resolution: {integrity: sha512-8c1vW4ocv3UOMp9K+gToY5zL2XiiVw3k7f1ksf4yO1FlDFQ1C2u72iACFnSOceJFsWskc2WZNqeRhFRPzv+wtQ==}
     cpu: [arm]
@@ -3311,6 +3317,9 @@ packages:
     resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}
     engines: {node: '>=8'}
 
+  flatbuffers@25.9.23:
+    resolution: {integrity: sha512-MI1qs7Lo4Syw0EOzUl0xjs2lsoeqFku44KpngfIduHBYvzm8h2+7K8YMQh1JtVVVrUvhLpNwqVi4DERegUJhPQ==}
+
   flow-enums-runtime@0.0.6:
     resolution: {integrity: sha512-3PYnM29RFXwvAN6Pc/scUfkI7RwhQ/xqyLUyPNlXUp9S40zI8nup9tUSrTLSVnWGBN38FNiGWbwZOB6uR4OGdw==}
 
@@ -3466,6 +3475,9 @@ packages:
     resolution: {integrity: sha512-rXunEHF9M9EkMydTBux7+IryYXEZinRk6g8OBOGDBzo/qWJjhTxy86i5q7lQYpCLHN8Sqv1XX3OIOc7ka2gtvQ==}
     engines: {node: '>=8.0.0'}
 
+  guid-typescript@1.0.9:
+    resolution: {integrity: sha512-Y8T4vYhEfwJOTbouREvG+3XDsjr8E3kIr7uf+JZ0BYloFsttiHU0WfvANVsR7TxNUJa/WpCnw/Ino/p+DeBhBQ==}
+
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
@@ -3548,8 +3560,8 @@ packages:
       zod-openapi:
         optional: true
 
-  hono@4.10.3:
-    resolution: {integrity: sha512-2LOYWUbnhdxdL8MNbNg9XZig6k+cZXm5IjHn2Aviv7honhBMOHb+jxrKIeJRZJRmn+htUCKhaicxwXuUDlchRA==}
+  hono@4.10.4:
+    resolution: {integrity: sha512-YG/fo7zlU3KwrBL5vDpWKisLYiM+nVstBQqfr7gCPbSYURnNEP9BDxEMz8KfsDR9JX0lJWDRNc6nXX31v7ZEyg==}
     engines: {node: '>=16.9.0'}
 
   http-cookie-agent@6.0.8:
@@ -3992,8 +4004,8 @@ packages:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
 
-  loro-crdt@1.8.7:
-    resolution: {integrity: sha512-9bwbuZ51IpPhGEEWxuhYuf4NX3q3esDnniBdBpGlaBdu2U3CvmXJdW2Ggk/63XgcvW8ZXHN32uJ77R98E3c9hg==}
+  loro-crdt@1.8.8:
+    resolution: {integrity: sha512-i94b6xZnD64JGcWfpciQ4hc+rz+ePp9VzN/W3vMGM1PNanMSqMujqzL2yHhUY1OzAkEh3JBhEwdxY1SeDmSedg==}
 
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
@@ -4312,6 +4324,12 @@ packages:
     resolution: {integrity: sha512-VXJjc87FScF88uafS3JllDgvAm+c/Slfz06lorj2uAY34rlUu0Nt+v8wreiImcrgAjjIHp1rXpTDlLOGw29WwQ==}
     engines: {node: '>=18'}
 
+  onnxruntime-common@1.23.0:
+    resolution: {integrity: sha512-Auz8S9D7vpF8ok7fzTobvD1XdQDftRf/S7pHmjeCr3Xdymi4z1C7zx4vnT6nnUjbpelZdGwda0BmWHCCTMKUTg==}
+
+  onnxruntime-web@1.23.0:
+    resolution: {integrity: sha512-w0bvC2RwDxphOUFF8jFGZ/dYw+duaX20jM6V4BIZJPCfK4QuCpB/pVREV+hjYbT3x4hyfa2ZbTaWx4e1Vot0fQ==}
+
   open@7.4.2:
     resolution: {integrity: sha512-MVHddDVweXZF3awtlAS+6pgKLlm/JgxZ90+/NBurBoQctVOOB/zDdVjcyPzQ+0laDGbsWgrRkflI65sQeOgT9Q==}
     engines: {node: '>=8'}
@@ -4479,6 +4497,9 @@ packages:
   pkce-challenge@5.0.0:
     resolution: {integrity: sha512-ueGLflrrnvwB3xuo/uGob5pd5FN7l0MsLf0Z87o/UQmRtwjvfylfc9MurIxRAWywCYTgrvpXBcqjV4OfCYGCIQ==}
     engines: {node: '>=16.20.0'}
+
+  platform@1.3.6:
+    resolution: {integrity: sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==}
 
   postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
@@ -5597,7 +5618,7 @@ snapshots:
       dotenv: 17.2.3
       helia: 5.5.1(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
       libp2p: 2.9.0
-      loro-crdt: 1.8.7
+      loro-crdt: 1.8.8
       pino: 10.0.0
       pino-pretty: 13.1.2
       zod: 3.25.76
@@ -7572,8 +7593,8 @@ snapshots:
       cohere-ai: 7.19.0
       date-fns: 3.6.0
       dotenv: 16.6.1
-      hono: 4.10.3
-      hono-openapi: 0.4.8(hono@4.10.3)(openapi-types@12.1.3)(zod@3.25.76)
+      hono: 4.10.4
+      hono-openapi: 0.4.8(hono@4.10.4)(openapi-types@12.1.3)(zod@3.25.76)
       json-schema: 0.4.0
       json-schema-to-zod: 2.6.1
       pino: 9.14.0
@@ -8776,6 +8797,10 @@ snapshots:
   '@redis/time-series@5.9.0(@redis/client@5.9.0)':
     dependencies:
       '@redis/client': 5.9.0
+
+  '@ricky0123/vad-web@0.0.29':
+    dependencies:
+      onnxruntime-web: 1.23.0
 
   '@rollup/rollup-android-arm-eabi@4.52.5':
     optional: true
@@ -10240,6 +10265,8 @@ snapshots:
       locate-path: 5.0.0
       path-exists: 4.0.0
 
+  flatbuffers@25.9.23: {}
+
   flow-enums-runtime@0.0.6: {}
 
   fn.name@1.1.0: {}
@@ -10391,6 +10418,8 @@ snapshots:
 
   grad-school@0.0.5: {}
 
+  guid-typescript@1.0.9: {}
+
   has-flag@4.0.0: {}
 
   has-symbols@1.1.0: {}
@@ -10457,15 +10486,15 @@ snapshots:
     dependencies:
       hermes-estree: 0.32.0
 
-  hono-openapi@0.4.8(hono@4.10.3)(openapi-types@12.1.3)(zod@3.25.76):
+  hono-openapi@0.4.8(hono@4.10.4)(openapi-types@12.1.3)(zod@3.25.76):
     dependencies:
       json-schema-walker: 2.0.0
       openapi-types: 12.1.3
     optionalDependencies:
-      hono: 4.10.3
+      hono: 4.10.4
       zod: 3.25.76
 
-  hono@4.10.3: {}
+  hono@4.10.4: {}
 
   http-cookie-agent@6.0.8(tough-cookie@5.1.2)(undici@6.22.0):
     dependencies:
@@ -11039,7 +11068,7 @@ snapshots:
     dependencies:
       js-tokens: 4.0.0
 
-  loro-crdt@1.8.7: {}
+  loro-crdt@1.8.8: {}
 
   lru-cache@10.4.3: {}
 
@@ -11415,6 +11444,17 @@ snapshots:
     dependencies:
       mimic-function: 5.0.1
 
+  onnxruntime-common@1.23.0: {}
+
+  onnxruntime-web@1.23.0:
+    dependencies:
+      flatbuffers: 25.9.23
+      guid-typescript: 1.0.9
+      long: 5.3.2
+      onnxruntime-common: 1.23.0
+      platform: 1.3.6
+      protobufjs: 7.5.4
+
   open@7.4.2:
     dependencies:
       is-docker: 2.2.1
@@ -11595,6 +11635,8 @@ snapshots:
   pirates@4.0.7: {}
 
   pkce-challenge@5.0.0: {}
+
+  platform@1.3.6: {}
 
   postcss-value-parser@4.2.0: {}
 

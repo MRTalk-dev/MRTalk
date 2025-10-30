@@ -4,6 +4,7 @@ import { type AnimationClip, AnimationMixer, Vector3 } from "three";
 import { loadMixamoAnimation } from "../lib/mixamo/loadMixamoAnimation";
 import { loadVRM } from "../lib/VRM/loadVRM";
 import { VOICEVOXClient } from "./audio/VOICEVOXClient";
+import { VoiceInputManager } from "./audio/VoiceInputManager";
 import { Companion } from "./companion/Companion";
 import { CompanionComponent } from "./companion/CompanionComponent";
 import { CONFIG } from "./config/constants";
@@ -103,30 +104,30 @@ async function main() {
 				wsClient.onMessage((msg) => router.route(msg));
 				await wsClient.connect();
 
-				/*
 				// 音声入力を開始(全コンパニオンにメッセージを送信)
 				const voiceInput = new VoiceInputManager((text) => {
-					voicevox.stopAll();
-					console.log(`[VoiceInput] Recognized: ${text}`);
-					// 全コンパニオンIDを取得
-					const companionIds = CONFIG.COMPANIONS.map((c) => c.id);
-					// 全コンパニオンにメッセージを送信
-					wsClient.send({
-						topic: "messages",
-						body: {
-							jsonrpc: "2.0",
-							method: "message.send",
-							params: {
-								id: crypto.randomUUID(),
-								from: "user",
-								to: companionIds,
-								message: text,
+					if (text.length >= 5) {
+						voicevox.stopAll();
+						console.log(`[VoiceInput] Recognized: ${text}`);
+						// 全コンパニオンIDを取得
+						const companionIds = CONFIG.COMPANIONS.map((c) => c.id);
+						// 全コンパニオンにメッセージを送信
+						wsClient.send({
+							topic: "messages",
+							body: {
+								jsonrpc: "2.0",
+								method: "message.send",
+								params: {
+									id: crypto.randomUUID(),
+									from: "user",
+									to: companionIds,
+									message: text,
+								},
 							},
-						},
-					});
+						});
+					}
 				});
-				await voiceInput.start();
-        */
+				await voiceInput.initVAD();
 			} catch (e) {
 				console.error(e);
 			}
