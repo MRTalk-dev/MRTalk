@@ -80,8 +80,7 @@ export class MessageRouter {
 			typeof message.id === "string" &&
 			typeof message.params === "object" &&
 			message.params !== null &&
-			"type" in message.params &&
-			"body" in message.params
+			"type" in message.params
 		);
 	}
 }

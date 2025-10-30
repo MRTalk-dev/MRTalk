@@ -32,7 +32,7 @@ export class VOICEVOXClient {
 		speakerId: number,
 	): Promise<Blob> {
 		const audioQuery = await this.client.createAudioQuery(message, speakerId);
-		const audioData = await audioQuery.synthesis(1);
+		const audioData = await audioQuery.synthesis(speakerId);
 		return new Blob([audioData], { type: "audio/wav" });
 	}
 

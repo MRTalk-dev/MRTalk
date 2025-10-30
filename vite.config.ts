@@ -27,10 +27,11 @@ export default defineConfig({
 		port: 8081,
 		open: true,
 		proxy: {
-			"/stt": {
+			"/stt/": {
 				target: "http://127.0.0.1:8000",
 				changeOrigin: true,
 				secure: false,
+				rewrite: (path) => path.replace(/^\/stt/, ""),
 			},
 			"/firehose": {
 				target: "http://localhost:8080",
@@ -38,10 +39,11 @@ export default defineConfig({
 				ws: true,
 				secure: false,
 			},
-			"/voicevox": {
+			"/voicevox/": {
 				target: "http://127.0.0.1:50021",
 				changeOrigin: true,
 				secure: false,
+				rewrite: (path) => path.replace(/^\/voicevox/, ""),
 			},
 		},
 	},
