@@ -45,7 +45,7 @@ async function main() {
 					const { gltf } = await loadVRM(config.vrmPath);
 					const vrm: VRM = gltf.userData.vrm;
 
-					vrm.scene.position.set(offset, 0, 0);
+					vrm.scene.position.set(offset * 0.5, 0, 0);
 					world.scene.add(vrm.scene);
 
 					const companionEntity = world.createTransformEntity(vrm.scene);

@@ -15,7 +15,7 @@
 		"check:fix": "biome check --write ./src ./companion ./lib",
 		"companion": "npx tsx companion/index.ts",
 		"firehose": "npx tsx companion/firehose.ts",
-		"voicevox": "docker run --rm --gpus all -p '127.0.0.1:50021:50021' voicevox/voicevox_engine:nvidia-latest"
+		"voicevox": "podman run --rm --gpus all -p '127.0.0.1:50021:50021' voicevox/voicevox_engine:nvidia-latest /opt/voicevox_engine/run --cors_policy_mode all --host 0.0.0.0 "
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^2.0.27",
