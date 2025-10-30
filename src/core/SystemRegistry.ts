@@ -6,11 +6,13 @@ import {
 	XRPlane,
 } from "@iwsdk/core";
 import { CompanionComponent } from "../companion/CompanionComponent";
+import { CompanionSystem } from "../companion/CompanionSystem";
 import { MeshProcessSystem } from "../navmesh/mesh";
 
 export interface SystemReferences {
 	sceneUnderstandingSystem: SceneUnderstandingSystem | undefined;
 	meshProcessSystem: MeshProcessSystem | undefined;
+	companionSystem: CompanionSystem | undefined;
 }
 
 export class SystemRegistry {
@@ -23,7 +25,8 @@ export class SystemRegistry {
 		// system を登録
 		world
 			.registerSystem(SceneUnderstandingSystem)
-			.registerSystem(MeshProcessSystem);
+			.registerSystem(MeshProcessSystem)
+			.registerSystem(CompanionSystem);
 
 		// component を登録
 		world
@@ -35,6 +38,7 @@ export class SystemRegistry {
 		// system 参照を取得
 		const sceneUnderstandingSystem = world.getSystem(SceneUnderstandingSystem);
 		const meshProcessSystem = world.getSystem(MeshProcessSystem);
+		const companionSystem = world.getSystem(CompanionSystem);
 
 		// system を設定
 		this.configureSceneUnderstanding(sceneUnderstandingSystem);
@@ -42,6 +46,7 @@ export class SystemRegistry {
 		return {
 			sceneUnderstandingSystem,
 			meshProcessSystem,
+			companionSystem,
 		};
 	}
 

@@ -9,7 +9,7 @@ import { CompanionComponent } from "./companion/CompanionComponent";
 import { CONFIG } from "./config/constants";
 import { SystemRegistry } from "./core/SystemRegistry";
 import { WorldManager } from "./core/WorldManager";
-import { NavMeshAgent, NavMeshManager } from "./navmesh/NavMeshManager";
+import { NavMeshAgent } from "./navmesh/NavMeshManager";
 import { ActionHandler } from "./websocket/ActionHandler";
 import { MessageRouter } from "./websocket/MessageRouter";
 import { QueryHandler } from "./websocket/QueryHandler";
@@ -28,15 +28,16 @@ async function main() {
 
 	// NavMeshを初期化
 	await init();
-	const navMesh = new NavMeshManager();
 
 	//VOICEVOXを初期化
 	const voicevox = new VOICEVOXClient(CONFIG.VOICEVOX_URL);
 
 	const companions = new Map<string, Companion>();
 	const mesh = systems.meshProcessSystem;
+	const companionSystem = systems.companionSystem;
+
 	if (mesh) {
-		mesh.onBaked = async () => {
+		mesh.onBaked = async (_navMesh, crowd) => {
 			try {
 				const promises = CONFIG.COMPANIONS.map(async (config, index) => {
 					const offset = index; // offsetを要素番号にする
@@ -66,9 +67,6 @@ async function main() {
 						if (clip) animations[name] = clip;
 					}
 
-					const crowd = navMesh.getCrowd();
-					if (!crowd) return;
-
 					const agent = new NavMeshAgent(crowd, new Vector3(offset, 0, 0));
 					const companion = new Companion(
 						config,
@@ -85,6 +83,11 @@ async function main() {
 
 				// 全てのコンパニオン読み込みが完了するまで待つ
 				await Promise.all(promises);
+
+				// CompanionSystemにcompanionsマップを渡す
+				if (companionSystem) {
+					companionSystem.setCompanions(companions);
+				}
 
 				const wsClient = new WebSocketClient(CONFIG.FIREHOSE_URL);
 				const actionHandler = new ActionHandler(companions);

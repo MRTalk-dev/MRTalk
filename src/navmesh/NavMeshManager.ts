@@ -19,10 +19,6 @@ export class NavMeshAgent {
 		this.agentIndex = agent.agentIndex;
 	}
 
-	get index() {
-		return this.agentIndex;
-	}
-
 	setSpeed(maxSpeed: number): void {
 		const agent = this.crowd.getAgent(this.agentIndex);
 		if (!agent) {
@@ -69,18 +65,12 @@ export class NavMeshAgent {
 }
 
 export class NavMeshManager {
-	private navMesh: NavMesh | null = null;
 	private crowd: Crowd | null = null;
-	private ready = false;
 
-	isReady(): boolean {
-		return this.ready && this.navMesh !== null && this.crowd !== null;
-	}
-
-	bakeNavMesh(meshes: THREE.Mesh[]) {
+	bakeNavMesh(meshes: THREE.Mesh[]): { navMesh: NavMesh; crowd: Crowd } | null {
 		if (meshes.length === 0) {
 			console.warn("No meshes to bake NavMesh");
-			return;
+			return null;
 		}
 
 		try {
@@ -88,24 +78,19 @@ export class NavMeshManager {
 
 			if (!result.navMesh) {
 				console.error("Failed to generate NavMesh");
-				return;
+				return null;
 			}
 
-			this.navMesh = result.navMesh;
 			this.crowd = new Crowd(result.navMesh, {
 				maxAgents: 10,
 				maxAgentRadius: 0.3,
 			});
 
-			this.ready = true;
-			console.log("NavMesh baked successfully");
+			return { navMesh: result.navMesh, crowd: this.crowd };
 		} catch (error) {
 			console.error("Failed to bake NavMesh:", error);
+			return null;
 		}
-	}
-
-	getCrowd(): Crowd | null {
-		return this.crowd;
 	}
 
 	update(deltaTime: number) {

@@ -1,11 +1,12 @@
 import { createSystem, XRMesh } from "@iwsdk/core";
+import type { Crowd, NavMesh } from "recast-navigation";
 import * as THREE from "three";
 import { NavMeshManager } from "./NavMeshManager";
 
 export class MeshProcessSystem extends createSystem({
 	meshEntities: { required: [XRMesh] },
 }) {
-	onBaked: () => void = () => {};
+	onBaked: (navMesh: NavMesh, crowd: Crowd) => void = () => {};
 	private navMeshManager!: NavMeshManager;
 	private globalMeshes: THREE.Mesh[] = [];
 	private furnitureEntities: Array<{
@@ -35,18 +36,15 @@ export class MeshProcessSystem extends createSystem({
 		});
 	}
 
-	private async bakeNavMesh() {
+	private bakeNavMesh() {
 		if (this.globalMeshes.length > 0) {
 			console.log(
 				`Baking NavMesh from ${this.globalMeshes.length} global meshes`,
 			);
-			await this.navMeshManager.bakeNavMesh(this.globalMeshes);
-			this.onBaked();
+			const result = this.navMeshManager.bakeNavMesh(this.globalMeshes);
+			console.log(result);
+			if (result) this.onBaked(result.navMesh, result.crowd);
 		}
-	}
-
-	getNavMeshManager(): NavMeshManager {
-		return this.navMeshManager;
 	}
 
 	getFurniture(): Array<{
@@ -61,5 +59,9 @@ export class MeshProcessSystem extends createSystem({
 				z: furniture.position.z,
 			},
 		}));
+	}
+
+	update(delta: number) {
+		this.navMeshManager.update(delta);
 	}
 }
